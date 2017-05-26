@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Alex
- * Date: 21.05.2017
- * Time: 20:57
- */
+
 
 ?>
 <!DOCTYPE html>
@@ -82,10 +77,37 @@
                         res = JSON.parse(reqAdd.responseText);
                         if (res['result'] == false){
                             alert(res['data']);
+                        }else{
+                            var table = $("#tableData");
+                            var list = res['data'][0];
+                            console.log(data.length);
+                            var tr = $('<tr>');
+                            for(var j = 0; j < data.length; j++) {
+                                    var el;
+                                    if(data[j][3] == 'PRI'){
+                                        el = $('<span>').append(list[j]);
+                                    }else{
+                                        el = $('<input>');
+                                        var x = list[j].length;
+                                        x = x>5?x:5;
+                                        x = x>80?80:x;
+                                        el.attr('style','width: ' + x +'em');
+                                        el.val(list[j]);
+                                    }
+                                    var td = $('<td>').append(el);
+                                    tr.append(td);
+                            }
+                                tr.click(function(event){
+                                    curtr = $(this);
+
+                                });
+                                table.append(tr);
+                            $("#divDataEdit").css("display", "none");
+                            $("#t_blok").remove();
                         }
                     };
-                    reqAdd.setRequestHeader("Content-Type", "text/plain");
-                    reqAdd.send(bodyPost+encodeURIComponent("ajax=true"));
+                    reqAdd.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                    reqAdd.send(bodyPost+"ajax=true");
                     return;
 
                 }));
@@ -102,20 +124,24 @@
                       var tr = $('<tr>');
                       for(var j = 0; j < list[i].length; j++) {
                           var el;
+                          var x;
+                          x = list[i][j].length;
                           if(data[j][3] == 'PRI'){
                               el = $('<span>').append(list[i][j]);
                           }else{
-                              el = $('<input>');
-                              var x = list[i][j].length;
                               x = x>5?x:5;
-                              el.attr('style','width: ' + x +'em');
-                              el.val(list[i][j]);
+                              x = x>80?80:x;
+                              el = $('<input>').val(list[i][j]);
                           }
-                          var td = $('<td>').append(el);
+                          var td = $('<td>').attr('style','width: ' + x +'em').append(el);
                           tr.append(td);
                       }
                       tr.click(function(event){
+                         if(!$.isEmptyObject(curtr)){
+                             $(curtr).removeClass("activtr");
+                         }
                          curtr = $(this);
+                         $(this).addClass("activtr");
 
                       });
                       table.append(tr);

@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Alex
- * Date: 21.05.2017
- * Time: 22:24
- */
+
 
 namespace myNs;
 
@@ -36,12 +31,13 @@ class Data
         return $res;
     }
     public function AddData($data, $number, $param){
-        $result = $this->db->prepare("INSERT INTO dataTable (data, number, param) VALUE ( ? , ? ,?)");
+        $result = $this->db->prepare("INSERT INTO dataTable (data, number, param) VALUE ( ? , ? ,?);");
         $result->bind_param("sid", $data, $number, $param);
         if(!$result->execute()){
             return array('result'=> false, 'data'=> 'Ошибка:('.$result->errno.')'. $result->error);
         }else{
-            return array('result'=> true, 'data'=> 'Успех');
+            $result = $this->db->query('SELECT * FROM dataTable WHERE id='.$this->db->insert_id);
+            return array('result'=> true, 'data'=> $result->fetch_all());
         }
     }
     public function updateData($id, $data, $number, $param){
@@ -50,7 +46,7 @@ class Data
         if(!$result->execute()){
             return array('result'=> false, 'data'=> 'Ошибка:('.$result->errno.')'. $result->error);
         }else{
-            return array('result'=> true, 'data'=> 'Успех');
+            return array('result'=> true, 'data'=> "Успех" );
         }
     }
     public function deleteData($id){
