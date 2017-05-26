@@ -1,0 +1,31 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+html{height: 100%}
+body{height: 100%}
+td {
+    border: 1px solid black;
+    text-align:  center;
+}
+
+table thead {
+    background-color: darkgray ;
+}
+
+table tbody:nth-child(even) {
+    background-color: aliceblue;
+}
+
+#divDataEdit{
+    width: 30%;
+    background-color: antiquewhite;
+    border: 2px solid #3cf;
+    display: none;
+    z-index: 3;
+    position: absolute;
+    left: 35%;
+    top: 10%;
+    max-width: 240px;
+    min-width: 90px;
+}
