@@ -15,6 +15,39 @@
     <script type="text/javascript">
         var data;
         var curtr;
+        function changeInput(){
+            var td = $(curtr).find('td');
+            var dataPost = "";
+            var v;
+            for(var i=0;i<td.length;i++ ){
+                if(data[i][3] == 'PRI' || data[i][1] == 'timestamp'){
+                    v = $(td[i]).find('p').text();
+                }else{
+                    v = $(td[i]).find('input').val();
+                }
+                dataPost+=encodeURIComponent(data[i][0])+"="+encodeURIComponent(v)+"&";
+            }
+            dataPost+="ajax=true";
+            var reqEdit = getXmlHttpRequest();
+            reqEdit.open('POST','EditData.php',true);
+            reqEdit.onreadystatechange = function(){
+                if (reqEdit.readyState != 4) return;
+                var res = {'result': true,'data':''};
+                res = JSON.parse(reqEdit.responseText);
+                for(var i=0;i<td.length;i++ ){
+                    if(data[i][3] == 'PRI' || data[i][1] == 'timestamp'){
+                        console.log(res['data'][0][i]);
+                        $(td[i]).find('p').text(res['data'][0][i]);
+                    }else{
+                        console.log(res['data'][0][i]);
+                        $(td[i]).find('input').val(res['data'][0][i]);
+                    }
+                }
+            };
+            reqEdit.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+            reqEdit.send(dataPost);
+
+        }
         $(document).ready(function(){
           console.log("start");
             $("#addBtn").click(function(e){
@@ -28,21 +61,27 @@
 
             });
             $("#delBtn").click(function(e){
-                var req = getXmlHttpRequest();
-                req.open('POST','delData.php',true);
-                req.onreadystatechange = function(){
-                    if (req.readyState != 4) return;
+                var reqDel = getXmlHttpRequest();
+                reqDel.open('POST','delData.php',true);
+                reqDel.onreadystatechange = function(){
+                    if (reqDel.readyState != 4) return;
                     var res = {'result': true,'data':''};
-                    res = JSON.parse(req.responseText);
+                    res = JSON.parse(reqDel.responseText);
                     if (res['result'] == false){
                         alert(res['data']);
+                    }else{
+                        $(curtr).remove();
+                        curtr = null;
                     }
-                }
+                };
+                var td = $(curtr).find('td');
+                var dataPost = data[0][0] + "=" + $(td[0]).find('p').text()+'&ajax=true';
+                reqDel.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                reqDel.send(dataPost);
             });
 
 
           var req = getXmlHttpRequest();
-          var url = window.location.protocol + "//"+ window.location.host + "/getData.php";
           req.open('POST','getHead.php',true);
           req.onreadystatechange = function(){
                 if (req.readyState != 4) return;
@@ -57,12 +96,12 @@
                 $("table thead").append(tr);
                 var tableEdit = $('#divDataEdit tbody');
                 for(var i = 0 ; i< data.length; i++){
-                    if(data[i][3] == "PRI") continue;
+                    if(data[i][3] == "PRI" || data[i][1] == 'timestamp') continue;
                   var td = $("<td>").append($("<p>").append(data[i][0]).css("padding","0 2px"));
-                  var td1 = $("<td>").append($("<input>").css('width','98%').css('border-width','0').css("padding",'0 1%'));
+                  var td1 = $("<td>").append($("<input>"));
                   tableEdit.append($("<tr>").append(td).append(td1));
                 }
-                tableEdit.append($("<button>Добавить</button>").click(function(){
+              $("#divDataEdit").append($("<button>Добавить</button>").click(function(){
                     var reqAdd = getXmlHttpRequest();
                     reqAdd.open('POST','addData.php',true);
                     var bodyPost = "";
@@ -84,21 +123,24 @@
                             var tr = $('<tr>');
                             for(var j = 0; j < data.length; j++) {
                                     var el;
-                                    if(data[j][3] == 'PRI'){
-                                        el = $('<span>').append(list[j]);
+                                    if(data[j][3] == 'PRI' || data[j][1] == 'timestamp'){
+                                        el = $('<p>').append(list[j]);
                                     }else{
-                                        el = $('<input>');
+                                        el = $('<input>').change(function(){changeInput();});
                                         var x = list[j].length;
                                         x = x>5?x:5;
                                         x = x>80?80:x;
-                                        el.attr('style','width: ' + x +'em');
                                         el.val(list[j]);
                                     }
                                     var td = $('<td>').append(el);
                                     tr.append(td);
                             }
                                 tr.click(function(event){
+                                    if(!$.isEmptyObject(curtr)){
+                                        $(curtr).removeClass("activtr");
+                                    }
                                     curtr = $(this);
+                                    $(this).addClass("activtr");
 
                                 });
                                 table.append(tr);
@@ -106,11 +148,15 @@
                             $("#t_blok").remove();
                         }
                     };
-                    reqAdd.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+                    reqAdd.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                     reqAdd.send(bodyPost+"ajax=true");
                     return;
 
                 }));
+              $("#divDataEdit").append($("<button>Отмена</button>").click(function(){
+                  $("#divDataEdit").css("display", "none");
+                  $("#t_blok").remove();
+              }));
 
 
               var req1 = getXmlHttpRequest();
@@ -126,12 +172,12 @@
                           var el;
                           var x;
                           x = list[i][j].length;
-                          if(data[j][3] == 'PRI'){
-                              el = $('<span>').append(list[i][j]);
+                          if(data[j][3] == 'PRI' || data[j][1] == 'timestamp'){
+                              el = $('<p>').append(list[i][j]);
                           }else{
                               x = x>5?x:5;
                               x = x>80?80:x;
-                              el = $('<input>').val(list[i][j]);
+                              el = $('<input>').val(list[i][j]).change(function(){changeInput();});
                           }
                           var td = $('<td>').attr('style','width: ' + x +'em').append(el);
                           tr.append(td);
@@ -153,12 +199,6 @@
           req.setRequestHeader("Content-Type", "text/plain");
           req.send();
         });
-
-
-        function EditData(){
-
-        }
-
 
     </script>
 </head>
@@ -193,7 +233,6 @@
         </tfoot>
     </table>
     <button id="addBtn">Добавить</button>
-    <button id="editBtn">Редактировать</button>
     <button id="delBtn">Удалить</button>
 </div>
 

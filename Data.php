@@ -46,11 +46,12 @@ class Data
         if(!$result->execute()){
             return array('result'=> false, 'data'=> 'Ошибка:('.$result->errno.')'. $result->error);
         }else{
-            return array('result'=> true, 'data'=> "Успех" );
+            $result = $this->db->query('SELECT * FROM dataTable WHERE id='.$id);
+            return array('result'=> true, 'data'=> $result->fetch_all());
         }
     }
     public function deleteData($id){
-        $result = $this->db->prepare("DELETE dataTable WHERE id = ?");
+        $result = $this->db->prepare("DELETE FROM dataTable WHERE id= ?");
         $result->bind_param("i", $id);
         if(!$result->execute()){
             return array('result'=> false, 'data'=> 'Ошибка:('.$result->errno.')'. $result->error);

@@ -7,6 +7,7 @@ body{height: 100%}
 td {
     border: 1px solid black;
     text-align:  center;
+
 }
 
 table thead {
@@ -31,12 +32,16 @@ table tbody:nth-child(even) {
 }
 input {
     outline: none;
-    border: none;
-    border-width: 0;
+    border: 0 none;
     padding: 0 1px;
     width: calc(100% - 2px);
+    background-color: inherit;
 }
 
 .activtr{
     background-color: aqua;
+}
+
+.inlinep {
+    display: inline;
 }
